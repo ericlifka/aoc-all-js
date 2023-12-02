@@ -13,5 +13,8 @@
     "javascript"
   ],
   "author": "Eric Lifka",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "md5": "^2.3.0"
+  }
 }
