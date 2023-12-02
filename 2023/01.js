@@ -1,4 +1,5 @@
 import { withInputLines } from "../utilities/with-input-lines.js"
+import { sum } from "../utilities/reducers.js"
 
 
 const getSimpleDigit = (line, pos) => line[pos] >= '0' && line[pos] <= '9' ? line[pos] : -1
@@ -35,12 +36,8 @@ const findLastDigit = (line, getDigit) => {
 const getCoordForLine = getDigit => line =>
     parseInt(findFirstDigit(line, getDigit) + findLastDigit(line, getDigit), 10)
 
+
 let input = withInputLines("2023/input/01.txt")
 
-console.log("part 1: ", input
-    .map(getCoordForLine(getSimpleDigit))
-    .reduce((sum, val) => sum + val, 0))
-
-console.log("part 2: ", input
-    .map(getCoordForLine(getFancyDigit))
-    .reduce((sum, val) => sum + val, 0))
+console.log("part 1: ", input.map(getCoordForLine(getSimpleDigit)).reduce(sum, 0))
+console.log("part 2: ", input.map(getCoordForLine(getFancyDigit)).reduce(sum, 0))

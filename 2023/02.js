@@ -1,4 +1,5 @@
 import { withInputLines } from "../utilities/with-input-lines.js"
+import { sum } from "../utilities/reducers.js"
 
 
 const parseGame = description => {
@@ -36,8 +37,7 @@ let games = withInputLines("2023/input/02.txt")
 
 console.log("part 1: ", 
     games.filter(isPossibleWithContents({red: 12, green: 13, blue: 14}))
-         .reduce((sum, game) => sum + game.id, 0))
+         .map(({ id }) => id)
+         .reduce(sum, 0))
 
-console.log("part 2: ",
-    games.map(powerOfGame)
-         .reduce((sum, power) => sum + power, 0))
+console.log("part 2: ", games.map(powerOfGame).reduce(sum, 0))
