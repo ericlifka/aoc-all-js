@@ -1,0 +1,1 @@
+console.error("No top level script, run individual solution scripts");
