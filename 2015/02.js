@@ -1,4 +1,4 @@
-import { withInputLines } from "../utilities/with-input-lines.js"
+import { withInputLines } from "../utilities/with-input.js"
 import { toInt } from "../utilities/parsers.js"
 import { ascending } from "../utilities/sort.js"
 import { sum } from "../utilities/reducers.js"
