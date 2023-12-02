@@ -1,5 +1,6 @@
 {
   "name": "aoc-all-js",
+  "type": "module",
   "version": "1.0.0",
   "description": "solutions repo for advent of code in javascript",
   "main": "index.js",
