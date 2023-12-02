@@ -1,26 +1,25 @@
 import { withInputLines } from "../utilities/with-input-lines.js"
 
+
 const parseGame = description => {
     let [idStr, rest] = description.split(': ')
     let id = parseInt(idStr.split(' ')[1], 10)
     let sets = rest.split('; ').map( set => 
         set.split(', ')
             .map( cubes => cubes.split(' '))
-            .map(([count, color]) => ({count: parseInt(count, 10), color})))
+            .map(([count, color]) => ({ count: parseInt(count, 10), color })))
 
     return { id, sets }
 }
 
 const minimumRequiredSetForGame = game => {
     let counts = { red: 0, blue: 0, green: 0 }
-    game.sets.forEach( set => {
-        set.forEach(({count, color}) => {
-            if (count > counts[color]) {
-                counts[color] = count
-            }
-        })
-    })
-    return {...game, counts}
+    game.sets.forEach( set => set.forEach(({ count, color }) => {
+        if (count > counts[color]) {
+            counts[color] = count
+        }
+    }))
+    return { ...game, counts }
 }
 
 const isPossibleWithContents = contents => game =>
@@ -29,6 +28,7 @@ const isPossibleWithContents = contents => game =>
     game.counts.red <= contents.red
 
 const powerOfGame = ({ counts }) => counts.red * counts.blue * counts.green
+
 
 let games = withInputLines("2023/input/02.txt")
     .map(parseGame)
