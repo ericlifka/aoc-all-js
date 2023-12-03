@@ -14,13 +14,24 @@ let schematic = [ ".".repeat(input[0].length), ...input, ".".repeat(input[0].len
 
 const isDigit = ch => /\d/.test(ch)
 
-const findAll = ch => {
+const findAll = check => {
     let collection = []
     for (let y = 0; y < schematic.length; y++) for (let x = 0; x < schematic[y].length; x++) {
-        if (schematic[y][x] == ch)
+        if (check(x, y))
             collection.push([ x, y ])
     }
     return collection
+}
+const findAllGears = () => findAll((x, y) => schematic[y][x] == '*')
+const findAllNumbers = () => findAll((x, y) => isDigit(schematic[y][x]) && !isDigit(schematic[y][x-1]))
+
+const touchingASymbol = ([ x, y ]) => {
+    while (isDigit(schematic[ y ][ x ])) {
+        if (getAdjacent(x, y).some(([ x, y ]) => /[*&@/+\-%$=#]/.test(schematic[y][x])))
+            return true
+        x++
+    }
+    return false
 }
 
 const parseNumberAt = ([ x, y ]) => {
@@ -52,36 +63,17 @@ const calcGearRatio = numbers =>
         : 0
 
 
-const part1 = () => {
-    let parts = []
-    for (let y = 0; y < schematic.length; y++) {
-        let x = 0
-        while (x < schematic[y].length) {
-            while (!isDigit(schematic[y][x]) && x < schematic[y].length) {
-                x++
-            }
-
-            let num = ""
-            let adjacent = []
-            while (isDigit(schematic[y][x])) {
-                num += schematic[y][x]
-                adjacent = [...adjacent, ...getAdjacent(x, y)]
-                x++
-            }
-            if (adjacent.some(([x, y]) => /[*&@/+\-%$=#]/.test(schematic[y][x]))) {
-                parts.push(parseInt(num, 10))
-            }
-            x++
-        }
-    }
-    return parts.reduce(sum)
-}
+const part1 = () =>
+    findAllNumbers()
+        .filter(touchingASymbol)
+        .map(parseNumberAt)
+        .reduce(sum)
 
 const part2 = () =>
-    findAll('*')
-    .map(getNubmersBorderingPoint)
-    .map(calcGearRatio)
-    .reduce(sum)
+    findAllGears()
+        .map(getNubmersBorderingPoint)
+        .map(calcGearRatio)
+        .reduce(sum)
 
 console.log("part 1: ", part1())
 console.log("part 2: ", part2())
