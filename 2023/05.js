@@ -1,9 +1,13 @@
 import { withInputSegments } from "../utilities/with-input.js"
 import { toInt, isNum } from "../utilities/parsers.js"
-import { ascending } from "../utilities/sort.js"
+import { ascending, compareByProp } from "../utilities/sort.js"
+import { splitIntoGroups } from "../utilities/vectors.js"
+import { elapsed } from "../utilities/timer.js"
 
+let rangeCompare = compareByProp('start', ascending)
 let sections = withInputSegments("2023/input/05.txt", "\n\n")
 let seeds = sections.shift().split(' ').map(toInt).filter(isNum)
+let seedRanges = splitIntoGroups(seeds, 2).map(([start, count]) => ({ start, end: start + count - 1 })).sort(rangeCompare)
 let almanac = sections.map( s => s
     .split('\n').slice(1)
     .map( triplet => triplet.split(' ').map(toInt))
@@ -12,62 +16,75 @@ let almanac = sections.map( s => s
         end: sourceRangeStart + rangeLength - 1,
         modifier: destinationRangeStart - sourceRangeStart
     }))
-    .sort((left, right) => left.start - right.start))
+    .sort(rangeCompare))
 
-const applySectionRule = (input, section) => {
-    let rule = section.find(({start, end}) => input >= start && input <= end)
-    return !rule ? input
-        : input + rule.modifier
-}
+const applySectionRule = (input, section) => input + (section.find(({start, end}) => input >= start && input <= end) || {modifier: 0}).modifier
+const calculateLocationForSeed = seed => ( almanac.forEach( section => seed = applySectionRule(seed, section)), seed )
+const findClosestSeed = seeds => seeds.map(calculateLocationForSeed).sort(ascending)[0]
 
-const mapSeedToLocation = seed => {
-    almanac.forEach( section => {
-        seed = applySectionRule(seed, section)
-    })
-    return seed
-}
-
-console.log('part 1: ', seeds.map(mapSeedToLocation).sort(ascending)[0])
-
-let seedRanges = []
-for (let i = 0; i < seeds.length; i += 2) {
-    seedRanges.push({ start: seeds[i], end: seeds[i] + seeds[i + 1] - 1 })
-}
-seedRanges.sort((left, right) => left.start - right.start)
-
-const isValidSeed = seed => {
-    for (let {start, end} of seedRanges) {
-        if (seed < start) return false
-        if (seed >= start && seed <= end) return true
+const putRangeThroughSection = ({ start, end }, section) => {
+    let newRanges = []
+    for (let range of section) {
+        if (start < range.start) {
+            if (end < range.start) {
+                newRanges.push({ start, end })
+                return newRanges
+            } else {
+                newRanges.push({ start, end: range.start - 1 })
+                start = range.start
+            }
+        }
+        
+        if (start <= range.end) {
+            if (end <= range.end) {
+                newRanges.push({
+                    start: start + range.modifier,
+                    end: end + range.modifier
+                })
+                return newRanges
+            } else {
+                newRanges.push({
+                    start: start + range.modifier,
+                    end: range.end + range.modifier
+                })
+                start = range.end + 1
+            }
+        }
     }
-    return false
+    newRanges.push({ start, end })
+    return newRanges
 }
 
-let reverseAlmanac = sections
-    .map( s => s
-        .split('\n').slice(1)
-        .map( triplet => triplet.split(' ').map(toInt))
-        .map(([ destinationRangeStart, sourceRangeStart, rangeLength]) => ({
-            start: destinationRangeStart,
-            end: destinationRangeStart + rangeLength - 1,
-            modifier: sourceRangeStart - destinationRangeStart
-        }))
-        .sort((left, right) => left.start - right.start))
-    .reverse()
-
-const mapLocationToSeed = location => {
-    reverseAlmanac.forEach( section => {
-        location = applySectionRule(location, section)
-    })
-    return location
-}
-
-let start = Date.now()
-for (let location = 0; ; location++) {
-    let seed = mapLocationToSeed(location)
-    if (isValidSeed(seed)) {
-        console.log(`part 2: seed<${seed}> to location<${location}>`)
-        break
+const collapseRanges = ranges => {
+    let newRanges = []
+    let current = {...ranges[0]}
+    for (let i = 1; i < ranges.length; i++) {
+        if (current.end + 1 >= ranges[i].start) { // connected
+            current.end = ranges[i].end
+        } else { // not connected
+            newRanges.push(current)
+            current = {...ranges[i]}
+        }
     }
+    newRanges.push(current)
+    return newRanges
 }
-console.log("elapsed: ", Date.now() - start, "ms")
+
+const runRangesThroughSection = (ranges, section) => {
+    let newRanges = []
+    for (let range of ranges) {
+        newRanges.push(...putRangeThroughSection(range, section))
+    }
+    return collapseRanges(newRanges.sort(rangeCompare))
+}
+
+const runRangesThroughAlmanac = seedRanges => {
+    let ranges = [...seedRanges]
+    for (let section of almanac) {
+        ranges = runRangesThroughSection(ranges, section)
+    }
+    return ranges[0].start
+}
+
+console.log('part 1: ', findClosestSeed(seeds), elapsed())
+console.log('part 2: ', runRangesThroughAlmanac(seedRanges), elapsed())
