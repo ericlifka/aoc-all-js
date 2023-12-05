@@ -29,15 +29,45 @@ const mapSeedToLocation = seed => {
 
 console.log('part 1: ', seeds.map(mapSeedToLocation).sort(ascending)[0])
 
+let seedRanges = []
+for (let i = 0; i < seeds.length; i += 2) {
+    seedRanges.push({ start: seeds[i], end: seeds[i] + seeds[i + 1] - 1 })
+}
+seedRanges.sort((left, right) => left.start - right.start)
+
+const isValidSeed = seed => {
+    for (let {start, end} of seedRanges) {
+        if (seed < start) return false
+        if (seed >= start && seed <= end) return true
+    }
+    return false
+}
+
+let reverseAlmanac = sections
+    .map( s => s
+        .split('\n').slice(1)
+        .map( triplet => triplet.split(' ').map(toInt))
+        .map(([ destinationRangeStart, sourceRangeStart, rangeLength]) => ({
+            start: destinationRangeStart,
+            end: destinationRangeStart + rangeLength - 1,
+            modifier: sourceRangeStart - destinationRangeStart
+        }))
+        .sort((left, right) => left.start - right.start))
+    .reverse()
+
+const mapLocationToSeed = location => {
+    reverseAlmanac.forEach( section => {
+        location = applySectionRule(location, section)
+    })
+    return location
+}
+
 let start = Date.now()
-let closest = Infinity
-for (let i = 0; i < seeds.length; i+=2) {
-    for (let seed = seeds[i]; seed < seeds[i] + seeds[i+1] - 1; seed++) {
-        let location = mapSeedToLocation(seed)
-        if (location < closest) {
-            closest = location
-        }
+for (let location = 0; ; location++) {
+    let seed = mapLocationToSeed(location)
+    if (isValidSeed(seed)) {
+        console.log(`part 2: seed<${seed}> to location<${location}>`)
+        break
     }
 }
-console.log('part 2: ', closest)
 console.log("elapsed: ", Date.now() - start, "ms")
