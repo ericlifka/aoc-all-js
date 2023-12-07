@@ -1,37 +1,4 @@
-/*
-
-["AlphaCentauri", "Snowdin", 4]
-Snowdin to Arbre = 7
-Faerun to Norrath = 11
-Tristram to AlphaCentauri = 34
-Tambi to Arbre = 40
-Faerun to Straylight = 66
-Tristram to Straylight = 89
-
-
- * AlphaCentauri to Faerun = 44
- * Snowdin to Norrath = 48
- * Tristram to Tambi = 63
- * Tambi to Faerun = 68
- * AlphaCentauri to Arbre = 74
- * AlphaCentauri to Tambi = 79
- * Snowdin to Straylight = 88
- * Snowdin to Faerun = 95
- * Tristram to Snowdin = 100
- * Snowdin to Tambi = 105
- * Tambi to Straylight = 107
- * Tristram to Faerun = 108
- * Tristram to Norrath = 111
- * Norrath to Straylight = 115
- * Straylight to Arbre = 127
- * Tristram to Arbre = 132
- * AlphaCentauri to Straylight = 133
-Tambi to Norrath = 134
- * Norrath to Arbre = 135
- * Faerun to Arbre = 144
- * AlphaCentauri to Norrath = 147
-
-*/
+import { ascending } from "../utilities/sort.js"
 
 let paths = [
     ["Tristram", "AlphaCentauri", 34],
@@ -64,65 +31,43 @@ let paths = [
     ["Straylight", "Arbre", 127],
 ]
 
-const createsClosedLoop = (networks, city1, city2) => {
-    for (let network of networks) {
-        if (network.has(city1) && network.has(city2)) {
-            return true
-        }
+const pathsByCity = {}
+paths.forEach(([city1, city2, distance]) => {
+    pathsByCity[city1] = pathsByCity[city1] || {}
+    pathsByCity[city1][city2] = distance
+
+    pathsByCity[city2] = pathsByCity[city2] || {}
+    pathsByCity[city2][city1] = distance
+})
+
+const permutations = items => {
+    if (items.length == 1) {
+        return [[...items]]
     }
-    return false
-}
 
-const findAffectedNetworks = (networks, city1, city2) => {
-    let found = []
-    for (let network of networks) {
-        if (network.has(city1) || network.has(city2)) {
-            found.push(network)
-        }
+    let perms = []
+    for (let i = 0; i < items.length; i++) {
+        let item = items[i]
+        let rest = items.filter(it => it != item)
+        let subPerms = permutations(rest)
+        subPerms.forEach( perm => {
+            perms.push([item, ...perm])
+        })
     }
-    return found
+    return perms
 }
 
-const findPath = orderedPaths => {
-    let completedCities = new Set()
-    let selectedPaths = []
-    let connectedNetworks = []
-
-    orderedPaths.forEach( path => {
-        let [city1, city2] = path
-
-        if (!completedCities.has(city1) && !completedCities.has(city2)) {
-            let affectedNetworks = findAffectedNetworks(connectedNetworks, city1, city2)
-            if (!(affectedNetworks.length == 1 && affectedNetworks[0].has(city1) && affectedNetworks[0].has(city2))) { // make sure it won't make a closed loop
-                selectedPaths.push(path)
-
-                if (affectedNetworks.length == 1) {
-                    let network = affectedNetworks[0]
-                    if (network.has(city1)) completedCities.add(city1)
-                    if (network.has(city2)) completedCities.add(city2)
-                    network.add(city1)
-                    network.add(city2)
-                } else if (affectedNetworks.length == 0) {
-                    connectedNetworks.push(new Set([city1, city2]))
-                } else { // need to merge two networks
-                    affectedNetworks[1].forEach( city => affectedNetworks[0].add(city) )
-                    affectedNetworks[1].clear()
-                    connectedNetworks = connectedNetworks.filter( network => network.size > 0 )
-                    completedCities.add(city1)
-                    completedCities.add(city2)
-                }
-            }
-        }
-    })
-
-    return selectedPaths
+const pathLength = path => {
+    let distance = 0
+    for (let i = 0; i < path.length - 1; i++) {
+        distance += pathsByCity[path[i]][path[i+1]]
+    }
+    return distance
 }
 
-const pathLength = network => network.reduce((total, [,,distance]) => total + distance, 0)
+let allPaths = permutations(Object.keys(pathsByCity))
+    .map(pathLength)
+    .sort(ascending)
 
-let orderedAscending = [...paths].sort((left, right) => left[2] - right[2])
-let orderedDescending = [...paths].sort((left, right) => right[2] - left[2])
-
-console.log('part 1: ', pathLength(findPath(orderedAscending)))
-console.log('part 2: ', pathLength(findPath(orderedDescending)))
-
+console.log('part 1: ', allPaths[0])
+console.log('part 2: ', allPaths[allPaths.length - 1])
