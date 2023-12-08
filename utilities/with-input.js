@@ -1,8 +1,12 @@
 import fs from "node:fs"
+import path from "node:path"
 
-const filename = (year, day) => `input/${year}-${day}.txt`
+let processDay = path.basename(process.argv[1].split('.')[0])
+let processYear = path.basename(path.dirname(process.argv[1]))
 
-export const withInput = (year, day) => fs.readFileSync(filename(year, day), "utf-8").trim()
-export const withInputSegments = (year, day, divider) => withInput(year, day).split(divider)
-export const withInputLines = (year, day) => withInputSegments(year, day, '\n')
-export const withInputChars = (year, day) => withInputSegments(year, day, '')
+const filename = () => `input/${processYear}-${processDay}.txt`
+
+export const withInput = () => fs.readFileSync(filename(), "utf-8").trim()
+export const withInputSegments = (divider) => withInput().split(divider)
+export const withInputLines = () => withInputSegments('\n')
+export const withInputChars = () => withInputSegments('')
