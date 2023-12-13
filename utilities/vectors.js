@@ -12,3 +12,10 @@ export const splitIntoGroups = (vec, size) => {
     }
     return collection
 }
+
+export const permutations = vec =>
+      (!vec || !vec.length) ? []
+    : (vec.length == 1) ? [ [...vec] ]
+    : vec.reduce((perms, val, i) =>
+        ( perms.push(...permutations([...vec.slice(0, i), ...vec.slice(i+1)]).map( perm => [val, ...perm] )) // lmao wut
+        , perms ), [])
