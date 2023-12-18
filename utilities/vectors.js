@@ -19,3 +19,16 @@ export const permutations = vec =>
     : vec.reduce((perms, val, i) =>
         ( perms.push(...permutations([...vec.slice(0, i), ...vec.slice(i+1)]).map( perm => [val, ...perm] )) // lmao wut
         , perms ), [])
+
+
+export const map2d = (vec2d, handler) =>
+    vec2d.map((row, y) => 
+        row.map((cell, x) => 
+            handler(cell, x, y, vec2d)))
+
+export const reduce2d = (vec2d, handler, accum) => {
+    vec2d.forEach((row, y) => row.forEach((cell, x) => {
+        accum = handler(accum, cell, x, y, vec2d)
+    }))
+    return accum
+}
