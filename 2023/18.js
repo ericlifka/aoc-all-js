@@ -1,95 +1,44 @@
 import { withInputLines } from "../utilities/with-input.js"
 import { vecAdd } from "../utilities/vectors.js"
-import { toInt } from "../utilities/parsers.js"
-
-const coordKey = ([ x, y ]) => `<${x},${y}>`
 
 const vectors = {
-    U: [  0,  1 ],
-    D: [  0, -1 ],
-    L: [ -1,  0 ],
-    R: [  1,  0 ] }
+    3: [  0,  1 ],  1: [  0, -1 ],  2: [ -1,  0 ],  0: [  1,  0 ],
+    U: [  0,  1 ],  D: [  0, -1 ],  L: [ -1,  0 ],  R: [  1,  0 ] }
 
-let position = [ 0, 0 ]
-let map = { [coordKey(position)]: '#' }
-let dimensions = {
-    min_x: 0, max_x: 0,
-    min_y: 0, max_y: 0 }
+const shoeLaceBetweenTwoPoints = ([ p1x, p1y ], [ p2x, p2y ]) => p1x * p2y - p1y * p2x
 
-const updateDimensions = ([ x, y ]) => {
-    dimensions.min_x = Math.min(dimensions.min_x, x)
-    dimensions.min_y = Math.min(dimensions.min_y, y)
-    dimensions.max_x = Math.max(dimensions.max_x, x)
-    dimensions.max_y = Math.max(dimensions.max_y, y)
+const shoeLaceAlgorithm = points => {
+    let sum = 0
+    for (let i = 0; i < points.length - 1; i++) {
+        sum += shoeLaceBetweenTwoPoints(points[i], points[i + 1])
+    }
+    return sum / 2
 }
 
-const printGrid = () => {
-    for (let y = dimensions.min_y; y <= dimensions.max_y; y++) {
-        let row = ""
-        for (let x = dimensions.min_x; x <= dimensions.max_x; x++) {
-            if (map[coordKey([x,y])]) {
-                row += map[coordKey([x,y])]
-            } else {
-                row += '.'
-            }
-        }
-        console.log(row)
-    }    
-}
+const pickAlgorithm = (area, boundary) => Math.abs(area) - Math.abs(boundary) / 2 + 1
 
+const followInstructions = instructions => {
+    let position = [ 0, 0 ]
+    let points = [ position ]
+    let boundarySize = 0
 
-withInputLines()
-    .map(line => line.split(' '))
-    .map(([direction, distance]) => [ vectors[direction], toInt(distance) ])
-    .forEach(([direction, distance]) => {
-        for (let i = 0; i < distance; i++) {
-            position = vecAdd(position, direction)
-            map[ coordKey(position) ] = '#'
-            updateDimensions(position)
-        }
+    instructions.forEach(([direction, distance]) => {
+        boundarySize += distance
+        position = vecAdd(position, direction.map( v => v * distance ))
+        points.push(position)
     })
 
-dimensions.min_x--
-dimensions.min_y--
-dimensions.max_x++
-dimensions.max_y++
+    let interiorPoints = pickAlgorithm(shoeLaceAlgorithm(points), boundarySize)
 
-printGrid()
-
-let queue = [ [dimensions.min_x, dimensions.min_y] ]
-while (queue.length > 0) {
-    let [ x, y ] = queue.pop()
-    if (!map[coordKey([ x, y ])]) {
-        map[coordKey([ x, y ])] = ' ';
-        ([
-            [ x - 1, y ],
-            [ x + 1, y ],
-            [ x, y - 1 ],
-            [ x, y + 1 ]
-        ]).forEach(([ x , y ]) => {
-            if (x >= dimensions.min_x && x <= dimensions.max_x && y >= dimensions.min_y && y <= dimensions.max_y) {
-                queue.push([ x, y ])
-            }
-        })
-    }
+    return boundarySize + interiorPoints
 }
 
+console.log('part 1: ', followInstructions(
+    withInputLines()
+        .map(line => line.split(' '))
+        .map(([direction, distance]) => [ vectors[direction], parseInt(distance, 10) ])))
 
-
-console.log('\n\n')
-printGrid()
-
-let area = 0
-for (let y = dimensions.min_y; y <= dimensions.max_y; y++) {
-    for (let x = dimensions.min_x; x <= dimensions.max_x; x++) {
-        let cell = map[coordKey([x,y])]
-        if (cell && cell == '#') {
-            area++
-        }
-        if (!cell) {
-            area++
-        }
-    }
-}
-
-console.log('part 1: ', area)
+console.log('part 2: ', followInstructions(
+    withInputLines()
+        .map(line => line.match(/.*\(#(.{5})(.)\)/))
+        .map(([_, distance, direction]) => [ vectors[direction], parseInt(distance, 16) ])))
