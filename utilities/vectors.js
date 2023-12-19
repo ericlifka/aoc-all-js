@@ -1,6 +1,10 @@
 export const vecAdd = (vecA, vecB) =>
     vecA.map((vA, index) => vecB[index] + vA)
 
+export const vecEqual = (vecA, vecB) =>
+       vecA.length == vecB.length 
+    && vecA.every((_, i) => vecA[i] == vecB[i])
+
 export const splitIntoGroups = (vec, size) => {
     let collection = []
     for (let i = 0; i < vec.length; i+= size) {

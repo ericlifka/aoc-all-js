@@ -1,6 +1,7 @@
 import { withInputGrid } from "../utilities/with-input.js"
 import { vecAdd, map2d, reduce2d } from "../utilities/vectors.js"
 import { descending } from "../utilities/sort.js"
+import { elapsed } from "../utilities/timer.js"
 
 const directions = {
     'N': [  0, -1 ],
@@ -70,7 +71,7 @@ const runSimulationFromStartingPosition = (startingPosition, startingDirection) 
     return reduce2d(energized, (count, cell) => cell ? count + 1 : count, 0)
 }
 
-console.log('part 1: ', runSimulationFromStartingPosition([ 0, 0, ], 'E'))
+console.log('part 1: ', runSimulationFromStartingPosition([ 0, 0, ], 'E'), elapsed())
 
 let energyTotals = []
 for (let y = 0; y < height; y++) {
@@ -82,4 +83,4 @@ for (let x = 0; x < width; x++) {
     energyTotals.push(runSimulationFromStartingPosition([ x, height - 1 ], 'N'))
 }
 
-console.log('part 2: ', energyTotals.sort(descending).at(0))
+console.log('part 2: ', energyTotals.sort(descending).at(0), elapsed())
