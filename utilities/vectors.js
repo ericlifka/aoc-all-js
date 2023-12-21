@@ -36,3 +36,6 @@ export const reduce2d = (vec2d, handler, accum) => {
     }))
     return accum
 }
+
+export const coalesceBy = (vec, prop) =>
+    vec.reduce((map, entry) => (map[entry[prop]] = entry, map), {})

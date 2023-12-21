@@ -30,6 +30,5 @@ const combineFactorLists = (list1, list2) => {
     return combined
 }
 
-export const leastCommonMultiple = (num1, num2) =>
-    combineFactorLists(getPrimeFactors(num1), getPrimeFactors(num2))
-        .reduce(multiply, 1)
+export const leastCommonMultiple = (...numbers) =>
+    numbers.map(getPrimeFactors).reduce(combineFactorLists).reduce(multiply, 1)
