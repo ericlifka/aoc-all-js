@@ -35,8 +35,14 @@ const withoutSlopeLimits = ({x, y}, visited, current) => {
     return true
 }
 
+let longest = 0
+
 function findLongestPath(position, steps, canBeTraversed, visited) {
     if (position.x == end.x && position.y == end.y) {
+        if (steps > longest) {
+            longest = steps
+            console.log('new longest: ', longest)
+        }
         return steps
     }
 
@@ -52,6 +58,10 @@ function findLongestPath(position, steps, canBeTraversed, visited) {
             visited.add(position.x + ',' + position.y)
             steps += 1
             if (position.x == end.x && position.y == end.y) { // victory!
+                if (steps > longest) {
+                    longest = steps
+                    console.log('new longest: ', longest)
+                }
                 return steps
             }
         }
