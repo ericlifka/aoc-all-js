@@ -1,6 +1,7 @@
 import { roundToPlaces } from "./numbers.js"
 
-let marker = Date.now()
+let start = Date.now()
+let marker = start
 
 const formatTime = millis => {
     if (millis < 1000) return millis + "ms"
@@ -15,3 +16,5 @@ export const elapsed = () => {
     marker = newMarker
     return msg
 }
+
+export const totalElapsed = () => `\n  elapsed: ${formatTime(Date.now()-start)}\n`

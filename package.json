@@ -15,6 +15,7 @@
   "author": "Eric Lifka",
   "license": "MIT",
   "dependencies": {
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "ml-matrix": "^6.11.0"
   }
 }

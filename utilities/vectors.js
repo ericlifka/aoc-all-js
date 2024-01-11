@@ -1,5 +1,8 @@
 export const vecAdd = (vecA, vecB) =>
-    vecA.map((vA, index) => vecB[index] + vA)
+    vecA.map((vA, index) => vA + vecB[index])
+
+export const vecSub = (vecA, vecB) =>
+    vecA.map((vA, index) => vA - vecB[index])
 
 export const vecEqual = (vecA, vecB) =>
        vecA.length == vecB.length 
