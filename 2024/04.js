@@ -1,5 +1,6 @@
 import {withInputGrid} from "../utilities/with-input.js"
 import {vecAdd} from "../utilities/vectors.js"
+import {totalElapsed} from "../utilities/timer.js"
 
 const letters = withInputGrid()
 
@@ -49,3 +50,5 @@ console.log('2024 day 04 part 2 -', letters
   .filter(Boolean)
   .filter(checkX)
   .length)
+
+console.log(totalElapsed())
