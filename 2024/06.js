@@ -1,31 +1,63 @@
 import {withInputGrid} from "../utilities/with-input.js"
+import {totalElapsed} from "../utilities/timer.js"
 
-const directions = [ [0, -1], [1, 0], [0, 1], [-1, 0] ]
-let direction_marker = 0
+const X = 0
+const Y = 1
+const DIRECTIONS = [ [0, -1], [1, 0], [0, 1], [-1, 0] ]
+const rotate = direction => DIRECTIONS[(1 + DIRECTIONS.findIndex( d => d[X] === direction[X] && d[Y] === direction[Y] )) % 4]
+const step = (position, direction) => [ position[X] + direction[X], position[Y] + direction[Y] ]
+const INPUT = withInputGrid()
+const WIDTH = INPUT[0].length
+const HEIGHT = INPUT.length
+const outOfBounds = ([x, y]) => x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT
+const input = () => INPUT.map( row => [...row] )
+const start_position = input().flatMap((row, y) => row.map((cell, x) => cell === '^' ? [ x, y ] : null)).filter(Boolean)[0]
+const start_direction = DIRECTIONS[ 0 ]
 
-let grid = withInputGrid()
-
-let position = grid.flatMap((row, y) => row.map((cell, x) => cell === '^' ? [ x, y ] : null)).filter(Boolean)[0]
-let direction = directions[direction_marker]
-grid[position[1]][position[0]] = 'X'
-
-const step = () => {
-  let next = [ position[0] + direction[0], position[1] + direction[1] ]
-  if (next[0] < 0 || next[1] < 0 || next[0] >= grid[0].length || next[1] >= grid.length) { // walk off grid
-    return false
+const patrol = (grid, position, direction) => {
+  let path = new Set()
+  while (true) {
+    let next = step(position, direction)
+    if (outOfBounds(next)) {
+      // left grid
+      return { loop: false, path }
+    }
+    if (grid[next[Y]][next[X]] === '#') {
+      // hit a wall, rotate
+      next = position
+      direction = rotate(direction)
+    }
+    position = next
+    let pathKey = `${position[X]},${position[Y]}-${direction[X]},${direction[Y]}`
+    if (path.has(pathKey)) {
+      // found a loop
+      return { loop: true, path }
+    }
+    path.add(pathKey)
+    grid[position[Y]][position[X]] = 'X'
   }
-  if (grid[next[1]][next[0]] === '#') { // hit a wall, rotate instead
-    next = position
-    direction_marker = (direction_marker + 1) % 4
-    direction = directions[direction_marker]
-  }
-
-  position = next
-  grid[position[1]][position[0]] = 'X'
-  return true
 }
 
-while (step()) { }
+let unalteredPatrol = patrol(input(), start_position, start_direction);
+let positions = new Set([...unalteredPatrol.path].map( item => item.split('-')[0]))
 
-console.log('2024 day 06 part 1 -', grid.flatMap(row => row.map(cell => cell)).filter(cell => cell === 'X').length)
-console.log(grid.length * grid[0].length)
+console.log('2024 day 06 part 1 -', positions.size + 1)
+
+const blockSpace = position => {
+  let grid = input()
+  grid[position[Y]][position[X]] = '#'
+  return grid
+}
+
+let count = 0
+positions.forEach( block => {
+  let grid = blockSpace(block.split(',').map(Number))
+  let { loop } = patrol(grid, start_position, start_direction)
+  if (loop) {
+    count++
+  }
+})
+
+console.log('2024 day 06 part 2 -', count)
+
+console.log(totalElapsed())
