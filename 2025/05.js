@@ -1,6 +1,6 @@
 import { sum } from "../utilities/reducers.js"
-import { elapsed } from "../utilities/timer.js"
 import { withInputSegments } from "../utilities/with-input.js"
+import { elapsed } from "../utilities/timer.js"
 
 let [ ranges, ids ] = withInputSegments('\n\n')
 

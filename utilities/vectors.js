@@ -42,3 +42,12 @@ export const reduce2d = (vec2d, handler, accum) => {
 
 export const coalesceBy = (vec, prop) =>
     vec.reduce((map, entry) => (map[entry[prop]] = entry, map), {})
+
+
+export const vec2dGetColumn = (vec2d, col) => {
+    let vec = []
+    for (let i = 0; i < vec2d.length; i++) {
+        vec.push(vec2d[ i ][ col ])
+    }
+    return vec
+}
