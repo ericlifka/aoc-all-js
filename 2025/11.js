@@ -9,36 +9,7 @@ const network = withInputLines()
     return network
   }, { out: new Set() })
 
-
-function pathsBetweenNodes(start, end) {
-  let totalPaths = 0
-  let queue = [{
-    position: start,
-    visited: new Set([ start ])
-  }]
-
-  while (queue.length > 0) {
-    let path = queue.pop()
-    for (let target of network[ path.position ]) {
-      if (target == end) {
-        totalPaths++
-      }
-      else if (!path.visited.has(target)) {
-        queue.push({
-          position: target,
-          visited: new Set([ target, ...path.visited ])
-        })
-      }
-    }
-  }
-
-  return totalPaths
-}
-
-const part1 = pathsBetweenNodes('you', 'out')
-console.log('part 1 -', part1, elapsed())
-
-function recursivePathsBetweenNodes(s, e) {
+function pathsBetween(s, e) {
   let cache = {}
 
   const recur = (start, end) => {
@@ -62,9 +33,12 @@ function recursivePathsBetweenNodes(s, e) {
   return recur(s, e)
 }
 
+const part1 = pathsBetween('you', 'out')
+console.log('part 1 -', part1, elapsed())
+
 const part2 =
-  recursivePathsBetweenNodes('svr', 'fft') *
-  recursivePathsBetweenNodes('fft', 'dac') *
-  recursivePathsBetweenNodes('dac', 'out')
+  pathsBetween('svr', 'fft') *
+  pathsBetween('fft', 'dac') *
+  pathsBetween('dac', 'out')
 
 console.log('part 2 -', part2, elapsed())
